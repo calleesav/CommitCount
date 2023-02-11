@@ -12,23 +12,9 @@ module.exports = class adoAPI
         this.urlToPCM = '/AVEVA-VSTS/Point%20Cloud%20Manager';
     }
 
-    getRequestPromise(response)
+    getRequestPromise(requestOptions)
     {
-
-    }
-    
-    async getCommits(totalCommits, fromDate)
-    {
-        const getCommits = this.urlToPCM + `/_apis/git/repositories/5a23e8f9-6a27-4f40-ba1f-73ca04917c07/commits?searchCriteria.$top=${totalCommits}&searchCriteria.fromDate=${fromDate}&api-version=4.1`
-
-        const requestOptions = {
-            host: this.baseUrl,
-            path: getCommits,
-        };
-
-        let self = this;
-        let bodyPromise = new Promise(function(resolve, reject){
-
+        return new Promise(function(resolve, reject){
             const request = https.request(requestOptions, function(response){
                 if(response.statusCode < 200 || response.statusCode >= 300){
                     return reject(new Error('STATUS CODE: ' + response.statusCode));
@@ -52,8 +38,24 @@ module.exports = class adoAPI
             request.setHeader('Content-Type', 'application/json; charset=utf-8;');
             request.setHeader("Authorization", "Basic " + btoa('Basic' + ":" + process.env.ADO_ACCESS_TOKEN));
             request.end();
-
         })
+    }
+    
+    test(resolve, reject, promiseOptions)
+    {
+
+    }
+    
+    async getCommits(totalCommits, fromDate)
+    {
+        const getCommits = this.urlToPCM + `/_apis/git/repositories/5a23e8f9-6a27-4f40-ba1f-73ca04917c07/commits?searchCriteria.$top=${totalCommits}&searchCriteria.fromDate=${fromDate}&api-version=4.1`
+
+        const requestOptions = {
+            host: this.baseUrl,
+            path: getCommits,
+        };
+
+        let bodyPromise = this.getRequestPromise(requestOptions);
 
         return await bodyPromise;
     }
