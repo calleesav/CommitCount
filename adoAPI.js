@@ -1,3 +1,5 @@
+const reposList = require('./privateresources/repos-list.json');
+
 const dotenv = require('dotenv');
 dotenv.config();
 
@@ -41,14 +43,9 @@ module.exports = class adoAPI
         })
     }
     
-    test(resolve, reject, promiseOptions)
+    async getCommits(repository, totalCommits, fromDate)
     {
-
-    }
-    
-    async getCommits(totalCommits, fromDate)
-    {
-        const getCommits = this.urlToPCM + `/_apis/git/repositories/5a23e8f9-6a27-4f40-ba1f-73ca04917c07/commits?searchCriteria.$top=${totalCommits}&searchCriteria.fromDate=${fromDate}&api-version=4.1`
+        const getCommits = this.urlToPCM + `/_apis/git/repositories/${repository}/commits?searchCriteria.$top=${totalCommits}&searchCriteria.fromDate=${fromDate}&api-version=4.1`
 
         const requestOptions = {
             host: this.baseUrl,
@@ -56,11 +53,25 @@ module.exports = class adoAPI
         };
 
         let bodyPromise = this.getRequestPromise(requestOptions);
-
         return await bodyPromise;
     }
 
-    getCommitsAllRepos()
+    async getCommitsAllRepos(totalCommits, fromDate)
     {
+        const pcmCommits = await this.getCommits(reposList.pcm, totalCommits, fromDate);
+        const cadlinksCommits = await this.getCommits(reposList.cadlinks, totalCommits, fromDate);
+        const cloudhostingCommits = await this.getCommits(reposList.cloudhosting, totalCommits, fromDate);
+        const viewerCommits = await this.getCommits(reposList.viewer, totalCommits, fromDate);
+
+        return pcmCommits.value.concat(cadlinksCommits.value).concat(cloudhostingCommits.value).concat(viewerCommits.value);
+    }
+
+    async getAllCommitsByAuthor(author, fromDate)
+    {
+        const commitsAllRepos = await this.getCommitsAllRepos(10000, fromDate);
+        const commitsByAuthor = commitsAllRepos.filter(commit => commit.author.email === author);
+
+        console.log(`${author} has ${commitsByAuthor.length} commit(s) since ${fromDate}`);
+        return commitsByAuthor;
     }
 }

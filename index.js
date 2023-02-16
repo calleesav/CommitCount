@@ -1,17 +1,12 @@
-const dotenv = require('dotenv');
-dotenv.config();
-https = require('https');
-adoAPI = require('./adoAPI');
+const Sprint = require('./sprintHelper');
+const CommitCountServer = require('./commitCountServer');
+const adoAPI = require('./adoAPI');
 
+const reposList = require('./privateresources/repos-list.json');
+const moment = require('moment');
+let commitCountServer = new CommitCountServer();
 
-const adoAPIWrapper = new adoAPI();
-
-async function runRequests()
+async function run()
 {
-    const test = await adoAPIWrapper.getCommits(10, '2023-02-07');
 
-    console.log(test);
 }
-
-
-runRequests();
